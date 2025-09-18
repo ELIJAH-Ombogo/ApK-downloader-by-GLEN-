@@ -55,12 +55,12 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.playBtn.innerHTML = '<i class="fas fa-play"></i>';
     });
 
-    // Search YouTube function
+    // Search YouTube function (stub)
     async function searchYouTube() {
         const query = elements.searchQuery.value.trim();
         
         if (!query) {
-            showError(elements.searchError, 'Please provide a search query!');
+            showError(elements.searchError, 'Please provide a YouTube URL!');
             return;
         }
         
@@ -70,15 +70,17 @@ document.addEventListener('DOMContentLoaded', function() {
         showElement(elements.loadingIndicator);
         
         try {
-            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to search');
-            }
-            
-            currentVideo = data;
-            displayVideoInfo(data);
+            // Here we don’t have a search API — assume query is a direct URL
+            currentVideo = {
+                url: query,
+                title: "Detected YouTube Video",
+                thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+                duration: "Unknown",
+                channel: "Unknown",
+                views: "N/A"
+            };
+
+            displayVideoInfo(currentVideo);
             
             hideElement(elements.loadingIndicator);
             showElement(elements.resultCard);
@@ -100,38 +102,53 @@ document.addEventListener('DOMContentLoaded', function() {
         clearError(elements.downloadError);
         
         try {
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = `/api/download?url=${encodeURIComponent(currentVideo.url)}&type=${type}`;
-            a.download = `${currentVideo.title.replace(/[^\w\s]/gi, '')}.${type === 'audio' ? 'mp3' : 'mp4'}`;
-            
-            // Track download start
-            let downloadStarted = false;
-            window.addEventListener('blur', function onBlur() {
-                downloadStarted = true;
-                window.removeEventListener('blur', onBlur);
-            });
-            
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            // Show success message after a delay
-            setTimeout(() => {
-                if (downloadStarted) {
-                    showDownloadSuccess(type);
+            let apis = [];
+
+            if (type === 'video') {
+                apis = [
+                    `https://api-rin-tohsaka.vercel.app/download/ytmp4?url=${encodeURIComponent(currentVideo.url)}`
+                ];
+            } else {
+                apis = [
+                    `https://apis.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(currentVideo.url)}`,
+                    `https://www.dark-yasiya-api.site/download/ytmp3?url=${encodeURIComponent(currentVideo.url)}`,
+                    `https://api.giftedtech.web.id/api/download/dlmp3?url=${encodeURIComponent(currentVideo.url)}&apikey=gifted-md`,
+                    `https://api.dreaded.site/api/ytdl/audio?url=${encodeURIComponent(currentVideo.url)}`
+                ];
+            }
+
+            let success = false;
+            for (const api of apis) {
+                try {
+                    const res = await fetch(api);
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `${currentVideo.title.replace(/[^\w\s]/gi, '')}.${type === 'audio' ? 'mp3' : 'mp4'}`;
+                        a.click();
+                        success = true;
+                        break;
+                    }
+                } catch (err) {
+                    console.warn(`API failed: ${api}`, err);
                 }
-                hideElement(elements.downloadLoading);
-            }, 3000);
+            }
+
+            if (!success) throw new Error("All download APIs failed.");
+
+            showDownloadSuccess(type);
             
         } catch (error) {
             hideElement(elements.downloadLoading);
             showError(elements.downloadError, error.message);
             console.error('Download error:', error);
+        } finally {
+            hideElement(elements.downloadLoading);
         }
     }
     
-    // Preview audio function
+    // Preview audio function (fake preview for now)
     async function previewAudio() {
         if (!currentVideo) return;
         
@@ -140,14 +157,8 @@ document.addEventListener('DOMContentLoaded', function() {
         clearError(elements.downloadError);
         
         try {
-            const response = await fetch(`/api/preview?url=${encodeURIComponent(currentVideo.url)}`);
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to load preview');
-            }
-            
-            elements.audioPlayer.src = data.previewUrl;
+            // For now, just attach the URL directly (would require API support for previews)
+            elements.audioPlayer.src = currentVideo.url;
             showElement(elements.previewPlayer);
             hideElement(elements.downloadLoading);
             
@@ -193,12 +204,10 @@ document.addEventListener('DOMContentLoaded', function() {
             `${type === 'audio' ? 'MP3' : 'MP4'} downloaded successfully! Check your downloads folder.`;
         showElement(elements.downloadSuccess);
         
-        // Auto-hide after 5 seconds
         setTimeout(() => {
             hideElement(elements.downloadSuccess);
         }, 5000);
         
-        // Optional vibration
         if (navigator.vibrate) navigator.vibrate(200);
     }
     
