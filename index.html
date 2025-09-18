@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLEN MP3/MP4 PLAYER</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00C2FF;
+            --secondary-color: #FF2D55;
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff00ff;
+            --neon-purple: #8a2be2;
+            --dark-bg: #121212;
+            --card-bg: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --gradient: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-pink) 100%);
+            --glow-effect: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-pink);
+            --pulse-animation: pulse 2s infinite;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(15, 240, 252, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 255, 0.05) 0%, transparent 20%);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin-top: 2rem;
+        }
+        
+        /* Boomplay-style card with NEON */
+        .card {
+            background: rgba(30, 30, 46, 0.8);
+            border-radius: 16px;
+            box-shadow: var(--glow-effect);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(15, 240, 252, 0.2);
+        }
+        
+        .card:hover {
+            box-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-pink);
+        }
+        
+        /* Header with gradient and NEON */
+        .card-header {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-bottom: none;
+            text-align: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 0 5px white, 0 0 10px var(--neon-blue);
+        }
+        
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            animation: rotate 15s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; box-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-pink); }
+        }
+        
+        .app-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #fff, var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: var(--pulse-animation);
+        }
+        
+        /* NEON buttons */
+        .btn-boom {
+            background: transparent;
+            color: white;
+            border: 2px solid var(--neon-blue);
+            font-weight: 600;
+            border-radius: 50px;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            text-shadow: 0 0 5px var(--neon-blue);
+            box-shadow: 0 0 10px rgba(15, 240, 252, 0.3);
+        }
+        
+        .btn-boom:hover {
+            color: black;
+            background: var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue), 0 0 25px var(--neon-blue);
+            transform: translateY(-2px);
+        }
+        
+        .btn-boom:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .btn-boom:hover:before {
+            left: 100%;
+        }
+        
+        /* Thumbnail style with NEON */
+        .video-thumbnail {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(15, 240, 252, 0.3);
+        }
+        
+        .video-thumbnail:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 25px var(--neon-pink);
+        }
+        
+        /* Audio player with NEON */
+        .preview-player {
+            background: rgba(40, 40, 60, 0.7);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 15px;
+            border: 1px solid var(--neon-purple);
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+        }
+        
+        audio {
+            width: 100%;
+            border-radius: 50px;
+            filter: drop-shadow(0 0 5px var(--neon-blue));
+        }
+        
+        /* Custom audio controls */
+        audio::-webkit-media-controls-panel {
+            background: rgba(40, 40, 60, 0.8);
+            border-radius: 50px;
+        }
+        
+        audio::-webkit-media-controls-play-button,
+        audio::-webkit-media-controls-mute-button {
+            background-color: var(--neon-blue);
+            border-radius: 50%;
+        }
+        
+        /* Progress bar with NEON */
+        .progress-container {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 5px var(--neon-blue);
+        }
+        
+        /* Developer section */
+        .developer-card {
+            background: rgba(30, 30, 46, 0.8);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            box-shadow: 0 0 10px rgba(15, 240, 252, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .developer-card:hover {
+            box-shadow: 0 0 15px var(--neon-blue), 0 0 25px var(--neon-pink);
+            transform: translateY(-3px);
+        }
+        
+        .developer-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        
+        .developer-info {
+            flex: 1;
+        }
+        
+        .developer-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--neon-blue);
+        }
+        
+        .developer-contact {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--neon-blue);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-btn:hover {
+            color: var(--neon-pink);
+            text-shadow: 0 0 5px var(--neon-pink);
+        }
+        
+        /* Success message with NEON */
+        .download-success {
+            background: rgba(0, 255, 100, 0.1);
+            border-left: 4px solid #00FF64;
+            color: #00FF64;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 0 5px rgba(0, 255, 100, 0.5);
+            animation: var(--pulse-animation);
+        }
+        
+        /* Error message with NEON */
+        .error-message {
+            background: rgba(255, 45, 85, 0.1);
+            border-left: 4px solid var(--secondary-color);
+            color: var(--secondary-color);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 0 5px rgba(255, 45, 85, 0.3);
+        }
+        
+        /* Footer with NEON */
+        footer {
+            background: rgba(18, 18, 18, 0.9);
+            color: var(--neon-blue);
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(15, 240, 252, 0.2);
+            text-shadow: 0 0 5px var(--neon-blue);
+        }
+        
+        footer strong {
+            color: var(--neon-pink);
+            text-shadow: 0 0 5px var(--neon-pink);
+        }
+        
+        /* Loading spinner with NEON */
+        .spinner-border {
+            color: var(--neon-blue);
+            filter: drop-shadow(0 0 5px var(--neon-blue));
+        }
+        
+        /* Input field with NEON - IMPROVED VISIBILITY */
+        .form-control {
+            background: rgba(40, 40, 60, 0.7);
+            border: 1px solid rgba(15, 240, 252, 0.3);
+            color: white !important; /* Force white text */
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-weight: 500;
+            text-shadow: 0 0 3px rgba(15, 240, 252, 0.5);
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7) !important;
+            text-shadow: none;
+        }
+        
+        .form-control:focus {
+            background: rgba(50, 50, 70, 0.9);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 0.25rem rgba(15, 240, 252, 0.25);
+            color: white !important;
+        }
+        
+        /* Form label - IMPROVED VISIBILITY */
+        .form-label {
+            color: var(--neon-blue);
+            font-weight: 600;
+            text-shadow: 0 0 5px var(--neon-blue);
+            margin-bottom: 8px;
+        }
+        
+        /* Video info */
+        .video-info h5 {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--neon-blue);
+        }
+        
+        .video-info p {
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .video-info i {
+            margin-right: 8px;
+            color: var(--neon-blue);
+            width: 16px;
+            text-align: center;
+            text-shadow: 0 0 5px var(--neon-blue);
+        }
+        
+        /* Download options */
+        .download-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        /* Initially hidden elements */
+        #resultCard, #loadingIndicator, #downloadLoading, #downloadSuccess, #downloadError {
+            display: none;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .download-options {
+                flex-direction: column;
+            }
+            
+            .download-options .btn {
+                width: 100%;
+            }
+            
+            .card-header {
+                padding: 1rem;
+            }
+            
+            .app-title {
+                font-size: 1.5rem;
+            }
+            
+            .developer-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="app-title">GLEN MP3/MP4 PLAYER</h1>
+                <p class="mb-0">Download & Stream in High Quality</p>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="searchQuery" class="form-label">Search YouTube</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchQuery" placeholder="Enter song or video title" style="color: white !important;">
+                        <button class="btn btn-boom" id="searchBtn">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    <div class="error-message" id="searchError"></div>
+                </div>
+                
+                <div class="loading text-center py-4" id="loadingIndicator">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Searching YouTube...</p>
+                </div>
+                
+                <div class="card result-card bg-transparent border-0" id="resultCard">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img src="" class="video-thumbnail" id="videoThumbnail" alt="Video thumbnail">
+                        </div>
+                        <div class="col-md-8 ps-md-3 mt-3 mt-md-0">
+                            <div class="video-info">
+                                <h5 id="videoTitle"></h5>
+                                <p><i class="far fa-clock"></i> <span id="videoDuration"></span></p>
+                                <p><i class="fas fa-user"></i> <span id="videoChannel"></span></p>
+                                <p><i class="fas fa-eye"></i> <span id="videoViews"></span></p>
+                                
+                                <div class="preview-player" id="previewPlayer" style="display: none;">
+                                    <audio controls id="audioPlayer" style="width: 100%"></audio>
+                                    <div class="preview-controls mt-2">
+                                        <button class="btn btn-sm btn-boom" id="playBtn">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                        <div class="progress-container" id="progressContainer">
+                                            <div class="progress-bar" id="progressBar"></div>
+                                        </div>
+                                        <span id="currentTime">0:00</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="download-options">
+                                    <button class="btn btn-boom" id="downloadVideoBtn">
+                                        <i class="fas fa-video"></i> Download video
+                                    </button>
+                                    <button class="btn btn-boom" id="downloadAudioBtn">
+                                        <i class="fas fa-music"></i> Download audio
+                                    </button>
+                                    <button class="btn btn-boom" id="previewBtn">
+                                        <i class="fas fa-play-circle"></i> Preview
+                                    </button>
+                                </div>
+                                
+                                <div class="loading text-center py-3" id="downloadLoading">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2" id="downloadMessage">Downloading...</p>
+                                </div>
+                                
+                                <div class="error-message" id="downloadError"></div>
+                                
+                                <div class="download-success" id="downloadSuccess" style="display: none;">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="successMessage"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+    <footer>
+        <div class="container">
+            <p class="mb-0">MADE<i class="fas fa-heart" style="color: var(--neon-pink);"></i> BY <strong>ELIJAH</strong></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
