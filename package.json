@@ -1,7 +1,7 @@
 {
-  "name": "obed-tech-player",
+  "name": "glen-player",
   "version": "1.0.0",
-  "description": "OBED TECH MP3/MP4 PLAYER",
+  "description": "GLEN MP3/MP4 PLAYER",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
