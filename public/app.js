@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (type === 'video') {
                 apis = [
-                    `https://api-rin-tohsaka.vercel.app/download/ytmp4?url=${encodeURIComponent(currentVideo.url)}`
+                    `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(currentVideo.url)}`
                 ];
             } else {
                 apis = [
